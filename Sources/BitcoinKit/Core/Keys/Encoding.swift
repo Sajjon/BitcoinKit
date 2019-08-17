@@ -201,7 +201,7 @@ public struct Bech32 {
         }
 
         // We can't have invalid checksum
-        let payload = Data(bytes: decodedIn5bit)
+        let payload = Data(decodedIn5bit)
         guard verifyChecksum(prefix: prefix, payload: payload) else {
             return nil
         }

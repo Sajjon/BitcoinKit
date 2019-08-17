@@ -108,9 +108,7 @@ extension Data {
             value = UInt64(self[1...2].to(type: UInt16.self))
         case 0xfe:
             value = UInt64(self[1...4].to(type: UInt32.self))
-        case 0xff:
-            fallthrough
-        default:
+        default: // 0xff
             value = self[1...8].to(type: UInt64.self)
         }
         return VarInt(value)
