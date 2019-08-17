@@ -270,7 +270,7 @@ public struct Bech32 {
         if pad && bits > 0 {
             converted.append(lastBits)
         }
-        return Data(bytes: converted)
+        return Data(converted)
     }
 
     internal static func convertFrom5bit(data: Data) throws -> Data {
@@ -296,7 +296,7 @@ public struct Bech32 {
             throw DecodeError.invalidBits
         }
 
-        return Data(bytes: converted)
+        return Data(converted)
     }
 
     private enum DecodeError: Error {
