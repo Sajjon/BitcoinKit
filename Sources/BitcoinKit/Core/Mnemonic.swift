@@ -85,7 +85,7 @@ public struct Mnemonic {
         return seed
     }
 
-    private static func wordList(for language: Language) -> [String.SubSequence] {
+    public static func wordList(for language: Language) -> [String] {
         switch language {
         case .english:
             return WordList.english
