@@ -910,14 +910,14 @@
 			isa = PBXGroup;
 			children = (
 				1482B5E32026F2580098B612 /* WordList.swift */,
+				E67112E923181BAA00F1496B /* WordList+English.swift */,
+				E67112F523181CB600F1496B /* WordList+French.swift */,
 				E67112F723181CCE00F1496B /* WordList+Italian.swift */,
+				E67112EB23181BF800F1496B /* WordList+Japanese.swift */,
 				E67112ED23181C3E00F1496B /* WordList+Korean.swift */,
 				E67112F123181C7700F1496B /* WordList+SimplifiedChinese.swift */,
-				E67112F323181C9900F1496B /* WordList+TraditionalChinese.swift */,
-				E67112F523181CB600F1496B /* WordList+French.swift */,
 				E67112EF23181C5A00F1496B /* WordList+Spanish.swift */,
-				E67112E923181BAA00F1496B /* WordList+English.swift */,
-				E67112EB23181BF800F1496B /* WordList+Japanese.swift */,
+				E67112F323181C9900F1496B /* WordList+TraditionalChinese.swift */,
 			);
 			path = WordList;
 			sourceTree = "<group>";
