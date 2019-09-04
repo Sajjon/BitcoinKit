@@ -30,30 +30,12 @@ public struct BitArray {
         }
     }
 
-//    /// A non-optimized initializer taking an  byte array `[UInt8]`
-//    public init<S: Sequence>(_ bytes: S, minBitCount: Int? = nil) where S.Iterator.Element == UInt8 {
-////        let bitString: String = bytes.map { byte in String(byte, radix: 2) }.joined()
-////        guard var bitArray = . else {
-////            fatalError("should always be able to create BitArray from byte array")
-////        }
-////        self = bitArray
-////
-////        if let minBitCount = minBitCount {
-////            while bitArray.count < minBitCount {
-////                bitArray.insert(false, at: 0)
-////            }
-////        }
-//    }
-
     public init(data: Data) {
-//        let byteArray: [UInt8] = data.map { $0 }
         guard let viaBitstring = BitArray(binaryString: data.binaryString) else {
-            fatalError("should always be able to init from data")
+            fatalError("should always be able to init from data, incorrect implementation of either Data.binaryString or `Self.init(binaryString:)`")
         }
 
-        guard viaBitstring.asData() == data else {
-            fatalError("⚠️ incorrect conversion, viaBitstring.asData().hex: '\(viaBitstring.asData().hex)', but data.hex: '\(data.hex)'")
-        }
+        assert(viaBitstring.asData() == data, "assert correctness of conversion")
 
         self = viaBitstring
     }
@@ -72,12 +54,12 @@ public struct BitArray {
         self.init(mapped)
     }
 
-//    /// A non-optimized initializer taking an array of `UInt11`
-//    init<S>(_ elements: S) where S: Sequence, S.Iterator.Element == UInt11 {
-//        let binaryString: String = elements.map { $0.binaryString }.joined()
-//        guard let bitArray = BitArray(binaryString) else { fatalError("Should always be able to create BitArray from [UInt11] binaryString: '\(binaryString)'") }
-//        self = bitArray
-//    }
+    /// A non-optimized initializer taking an array of `UInt11`
+    init<S>(_ elements: S) where S: Sequence, S.Iterator.Element == UInt11 {
+        let binaryString: String = elements.map { $0.binaryString }.joined()
+        guard let bitArray = BitArray(binaryString: binaryString) else { fatalError("Should always be able to create BitArray from [UInt11] binaryString: '\(binaryString)'") }
+        self = bitArray
+    }
 
     /// Constructs a new bit array from an `Int` array representation.
     /// All values different from 0 are considered `true`.
@@ -112,11 +94,6 @@ public struct BitArray {
 
     /// Number of bits stored in the bit array.
     public fileprivate(set) var count = 0
-
-//    /// Returns `true` if and only if `count == 0`.
-//    public var isEmpty: Bool {
-//        return count == 0
-//    }
 
     /// The first bit, or nil if the bit array is empty.
     public var first: Bool? {
@@ -314,8 +291,7 @@ extension BitArray: CustomStringConvertible {
     public var description: String { map { "\($0 == true ? 1 : 0)" }.joined() }
 }
 
-extension BitArray: Equatable {
-}
+extension BitArray: Equatable {}
 
 // MARK: BitArray Equatable Protocol Conformance
 
@@ -328,9 +304,7 @@ public func == (lhs: BitArray, rhs: BitArray) -> Bool {
 }
 
 // MARK: Hashable Protocol Conformance
-extension BitArray: Hashable {
-    /* auto synthesised */
-}
+extension BitArray: Hashable {}
 
 public extension BitArray {
 
@@ -350,12 +324,6 @@ public extension BitArray {
         guard bitCount > 0 else { return [] }
         return prefix(maxBitCount: bitCount)
     }
-
-//    func suffix(subtractFromCount n: Int) -> BitArray {
-//        let bitCount = count - n
-//        guard bitCount > 0 else { return [] }
-//        return suffix(maxBitCount: bitCount)
-//    }
 }
 
 public extension BitArray {
@@ -369,10 +337,8 @@ public extension BitArray {
         let numBytes = (numBits + 7) / 8
         var bytes = [UInt8](repeating: 0, count: numBytes)
 
-        for (index, bit) in self.enumerated() {
-            if bit == true {
-                bytes[index / 8] += UInt8(1 << (7 - index % 8))
-            }
+        for (index, bit) in self.enumerated() where bit == true {
+            bytes[index / 8] += UInt8(1 << (7 - index % 8))
         }
 
         return bytes

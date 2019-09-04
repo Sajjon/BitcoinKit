@@ -192,7 +192,7 @@ class MnemonicTests: XCTestCase {
                             key: vector[3])
             
             let entropy = Data(hex: expected.entropy)!
-            let mnemonic = Mnemonic.generate(entropy: entropy)
+            let mnemonic = try! Mnemonic.generate(entropy: entropy)
             XCTAssertEqual(mnemonic.joined(separator: " "), expected.mnemonic)
             
             let seed = try! Mnemonic.seed(mnemonic: mnemonic, passphrase: "TREZOR")
@@ -409,7 +409,7 @@ class MnemonicTests: XCTestCase {
                             bip32_xprv: vector["bip32_xprv"]!)
             
             let entropy = Data(hex: expected.entropy)!
-            let mnemonic = Mnemonic.generate(entropy: entropy, language: .japanese)
+            let mnemonic = try! Mnemonic.generate(entropy: entropy, language: .japanese)
             XCTAssertEqual(mnemonic.joined(separator: "　"), expected.mnemonic)
             
             let seed = try! Mnemonic.seed(mnemonic: mnemonic, passphrase: expected.passphrase)
@@ -427,10 +427,31 @@ class MnemonicTests: XCTestCase {
     }
 
     func testChecksummedVectorsWordCountOf24() {
-         for vector in checksumVectorsWordCountOf24 {
-             doTest(checksumVector: vector)
-         }
-     }
+        for vector in checksumVectorsWordCountOf24 {
+            doTest(checksumVector: vector)
+        }
+    }
+
+    func testGenerateManyAndVerifyChecksummed() {
+        for strength in Mnemonic.Strength.allCases {
+            for language in Mnemonic.Language.allCases {
+                for _ in 0..<10 {
+                    XCTAssertNoThrow(
+                        try Mnemonic.generate(strength: strength, language: language)
+                    )
+                }
+            }
+        }
+    }
+
+    func testChecksumValidation() {
+        let mnemonic = "gown pulp squeeze squeeze chuckle glance skill glare force dog absurd tennis"
+        let words: [String] = mnemonic.split(separator: " ").map { String($0) }
+        let lastWordReplaced: [String] = { var tmp = words; tmp[11] = "cat"; return tmp }()
+        XCTAssertNoThrow(try Mnemonic.seed(mnemonic: words))
+        XCTAssertThrowsError(try Mnemonic.seed(mnemonic: lastWordReplaced))
+        XCTAssertNoThrow(Mnemonic.seed(mnemonic: lastWordReplaced, validateChecksum: { _ in }))
+    }
 }
 
 private extension MnemonicTests {

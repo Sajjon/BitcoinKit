@@ -196,6 +196,10 @@
 		29F5D1E421106772007DA3BF /* BigNumberTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F5D1E321106772007DA3BF /* BigNumberTests.swift */; };
 		29F5D1E6211068E8007DA3BF /* BigNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F5D1E5211068E8007DA3BF /* BigNumber.swift */; };
 		484DACB6231EC2BA00CD4E5D /* BitArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484DACB5231EC2BA00CD4E5D /* BitArray.swift */; };
+		484DACBA231FC5F900CD4E5D /* RangeReplaceableCollection_Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484DACB9231FC5F900CD4E5D /* RangeReplaceableCollection_Extensions.swift */; };
+		484DACBD231FCCC400CD4E5D /* UInt11.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484DACBC231FCCC400CD4E5D /* UInt11.swift */; };
+		484DACBF231FCCEE00CD4E5D /* FixedWidthInteger_Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484DACBE231FCCEE00CD4E5D /* FixedWidthInteger_Extensions.swift */; };
+		484DACC1231FCD0100CD4E5D /* Data_Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484DACC0231FCD0100CD4E5D /* Data_Extensions.swift */; };
 		6E20AEC72112C290008A9810 /* PrivateKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E20AEC62112C290008A9810 /* PrivateKeyTests.swift */; };
 		6E20AEC92112C31A008A9810 /* LegacyAddressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E20AEC82112C31A008A9810 /* LegacyAddressTests.swift */; };
 		6E20AECB2112C434008A9810 /* HDPrivateKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E20AECA2112C434008A9810 /* HDPrivateKeyTests.swift */; };
@@ -436,6 +440,10 @@
 		29F5D1E321106772007DA3BF /* BigNumberTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigNumberTests.swift; sourceTree = "<group>"; };
 		29F5D1E5211068E8007DA3BF /* BigNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigNumber.swift; sourceTree = "<group>"; };
 		484DACB5231EC2BA00CD4E5D /* BitArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitArray.swift; sourceTree = "<group>"; };
+		484DACB9231FC5F900CD4E5D /* RangeReplaceableCollection_Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeReplaceableCollection_Extensions.swift; sourceTree = "<group>"; };
+		484DACBC231FCCC400CD4E5D /* UInt11.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UInt11.swift; sourceTree = "<group>"; };
+		484DACBE231FCCEE00CD4E5D /* FixedWidthInteger_Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixedWidthInteger_Extensions.swift; sourceTree = "<group>"; };
+		484DACC0231FCD0100CD4E5D /* Data_Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data_Extensions.swift; sourceTree = "<group>"; };
 		6E20AEC62112C290008A9810 /* PrivateKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKeyTests.swift; sourceTree = "<group>"; };
 		6E20AEC82112C31A008A9810 /* LegacyAddressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAddressTests.swift; sourceTree = "<group>"; };
 		6E20AECA2112C434008A9810 /* HDPrivateKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDPrivateKeyTests.swift; sourceTree = "<group>"; };
@@ -558,6 +566,7 @@
 		147494C9201F9A29006D1CF8 /* BitcoinKit */ = {
 			isa = PBXGroup;
 			children = (
+				484DACB8231FC5E400CD4E5D /* Extensions */,
 				292AEA3C2112EB190012D7E5 /* Core */,
 				296ADC1E2112EBAD007EE5C7 /* Scripts */,
 				296ADC1F2112EBF4007EE5C7 /* Wallet */,
@@ -648,8 +657,8 @@
 				1463E6B32025E9480033DAAE /* BlockStore.swift */,
 				E6A64305224418EB00CD4BFC /* PointOnCurve.swift */,
 				E6A643072244190400CD4BFC /* Scalar32Bytes.swift */,
-				1482B5E12026B0680098B612 /* Mnemonic.swift */,
-				484DACB5231EC2BA00CD4E5D /* BitArray.swift */,
+				484DACBB231FCCAB00CD4E5D /* Mnemonic */,
+				484DACB7231FC5C000CD4E5D /* BinaryString */,
 				E67112E823181B6A00F1496B /* WordList */,
 				14839A7B202F79F900A6CB34 /* PaymentURI.swift */,
 				147494E3201F9B85006D1CF8 /* Crypto.swift */,
@@ -909,6 +918,33 @@
 			path = Keys;
 			sourceTree = "<group>";
 		};
+		484DACB7231FC5C000CD4E5D /* BinaryString */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = BinaryString;
+			sourceTree = "<group>";
+		};
+		484DACB8231FC5E400CD4E5D /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				484DACB9231FC5F900CD4E5D /* RangeReplaceableCollection_Extensions.swift */,
+				484DACBE231FCCEE00CD4E5D /* FixedWidthInteger_Extensions.swift */,
+				484DACC0231FCD0100CD4E5D /* Data_Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		484DACBB231FCCAB00CD4E5D /* Mnemonic */ = {
+			isa = PBXGroup;
+			children = (
+				484DACB5231EC2BA00CD4E5D /* BitArray.swift */,
+				484DACBC231FCCC400CD4E5D /* UInt11.swift */,
+				1482B5E12026B0680098B612 /* Mnemonic.swift */,
+			);
+			path = Mnemonic;
+			sourceTree = "<group>";
+		};
 		E67112E823181B6A00F1496B /* WordList */ = {
 			isa = PBXGroup;
 			children = (
@@ -1122,6 +1158,7 @@
 				0CD92D3B2118153700DD3148 /* OP_LESSTHANOREQUAL.swift in Sources */,
 				14839AA1202FE75500A6CB34 /* TransactionWitness.swift in Sources */,
 				29330F6E210597B700106AFA /* UnitsAndLimits.swift in Sources */,
+				484DACC1231FCD0100CD4E5D /* Data_Extensions.swift in Sources */,
 				CFA2906C2101CD96001A1BAB /* ScriptChunk.swift in Sources */,
 				29330147214F97450028946B /* BitcoinKitDataStoreProtocol.swift in Sources */,
 				14F37A3C20209F9200D34748 /* Script.swift in Sources */,
@@ -1236,11 +1273,13 @@
 				2949920620F22DCA00D078B6 /* UnsignedTransaction.swift in Sources */,
 				14839A9B202FE71200A6CB34 /* TransactionInput.swift in Sources */,
 				2914BE43211BAAE500B349CB /* OP_SHA256.swift in Sources */,
+				484DACBA231FC5F900CD4E5D /* RangeReplaceableCollection_Extensions.swift in Sources */,
 				0C0900342116A53F0077E9BC /* OP_NOT.swift in Sources */,
 				CFA290722102B635001A1BAB /* ScriptMachine.swift in Sources */,
 				294DDE45211B31FA00B7F645 /* OP_VERNOTIF.swift in Sources */,
 				0C2375A02132431B00DB2872 /* HeadersMessage.swift in Sources */,
 				147494EE201FADAC006D1CF8 /* MurmurHash.swift in Sources */,
+				484DACBF231FCCEE00CD4E5D /* FixedWidthInteger_Extensions.swift in Sources */,
 				0C09002E2116A32C0077E9BC /* OP_2MUL.swift in Sources */,
 				29290B9F210AF8FD00D2BE78 /* OP_EQUAL.swift in Sources */,
 				14839A8B202FE64D00A6CB34 /* GetDataMessage.swift in Sources */,
@@ -1263,6 +1302,7 @@
 				1463E6B42025E9480033DAAE /* BlockStore.swift in Sources */,
 				14839A8D202FE66A00A6CB34 /* PingMessage.swift in Sources */,
 				0C0900362116A62E0077E9BC /* OP_0NOTEQUAL.swift in Sources */,
+				484DACBD231FCCC400CD4E5D /* UInt11.swift in Sources */,
 				0C1DE15D211E6EB400FE8E43 /* OP_DROP.swift in Sources */,
 				299CB47320F0185500B1245C /* TransactionSignatureSerializer.swift in Sources */,
 			);
