@@ -30,6 +30,9 @@ import BitcoinKit.Private
 import BitcoinKitPrivate
 #endif
 
+private let bitsPerByte = 8
+private let wordListSizeLog2 = 11 // 2^11 => 2048
+
 public struct Mnemonic {
 
     public enum Strength: Int, CaseIterable {
@@ -56,7 +59,7 @@ public struct Mnemonic {
         }
 
         fileprivate static func wordCountFrom(entropyInBits: Int) -> Int {
-            return Int(ceil(Double(entropyInBits) / Double(11)))
+            return Int(ceil(Double(entropyInBits) / Double(wordListSizeLog2)))
         }
 
         /// `wordCount` must be divisible by `3`, else `nil` is returned
@@ -96,7 +99,7 @@ public struct Mnemonic {
     }
 
     public static func generate(strength: Strength = .default, language: Language = .english) throws -> [String] {
-        let byteCount = strength.rawValue / 8
+        let byteCount = strength.rawValue / bitsPerByte
         var bytes = Data(count: byteCount)
         let status = bytes.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, byteCount, $0) }
         guard status == errSecSuccess else { throw MnemonicError.randomBytesError }
@@ -135,62 +138,38 @@ public struct Mnemonic {
     // alternative in C:
     // https://github.com/trezor/trezor-crypto/blob/0c622d62e1f1e052c2292d39093222ce358ca7b0/bip39.c#L161-L179
     public static func validateChecksumOf(mnemonic mnemonicWords: [String], language: Language) throws {
-        let allowedWordCounts = Strength.allCases.map({ $0.wordCount.wordCount })
-        let wordCount = mnemonicWords.count
-        guard allowedWordCounts.contains(wordCount) else {
-            throw MnemonicError.invalid(.badWordCount(expectedAnyOf: allowedWordCounts, butGot: wordCount))
-        }
-        let list = wordList(for: language)
-        let wordlist = wordList(for: language)
-        let indexes: [Int] = try mnemonicWords.map { (word: String) throws -> Int in
-            guard let index = wordlist.firstIndex(of: word) else {
-                throw MnemonicError.invalid(.wordNotInList(word, language: language))
-            }
-            return index
-        }
-        let binaryString: String = indexes.map { String($0, radix: 2).prepending(character: "0", toLength: 11) }.joined()
+        let vocabulary = wordList(for: language)
 
-        let checksumLength = wordCount / 3 /* in python the double division operator `//` is used, which is divideAndFloor */
-        guard checksumLength <= 8 else { fatalError("wordCount of: \(wordCount) not supported") }
+//        let indexes: [UInt11] = try mnemonicWords.map { word in
+//            guard let indexInVocabulary = vocabulary.firstIndex(of: word) else {
+//                throw MnemonicError.invalid(.wordNotInList(word, language: language))
+//            }
+//            guard let indexAs11Bits = UInt11(exactly: indexInVocabulary) else {
+//                fatalError("Unexpected error, is word list longer than 2048 words, it shold not be")
+//            }
+//            return indexAs11Bits
+//        }
 
-        func extractRelevantData(usePrefix usePrefixElseUseSuffix: Bool, numberOfBits n: Int) -> UInt8 {
-            let s = binaryString
-            let subString = usePrefixElseUseSuffix ? s.prefix(n) : s.suffix(n)
+        let bitStringFromIndex: String = try mnemonicWords.map { word in
+             guard let indexInVocabulary = vocabulary.firstIndex(of: word) else {
+                 throw MnemonicError.invalid(.wordNotInList(word, language: language))
+             }
+            let binString = String(indexInVocabulary, radix: 2).prepending(element: "0", toLength: 11)
+            assert(binString.count == 11)
+            return binString
+        }.joined()
 
-            guard let byteFromSubstring = UInt8(String(subString), radix: 2) else {
-                fatalError("failed to extract relevant data")
-            }
-            return byteFromSubstring
-        }
-
-        let expectedChecksum: UInt8 = extractRelevantData(usePrefix: false, numberOfBits: checksumLength)
-        func dataFromBinaryString(_ partialBinaryString: String) -> Data {
-            var partialBinaryString = partialBinaryString
-            let bitsPerByte = 8
-            var bytes = [UInt8]()
-            while !partialBinaryString.isEmpty {
-                let byteAsString = String(partialBinaryString.prefix(bitsPerByte)).prepending(character: "0", toLength: bitsPerByte)
-                guard let byte = UInt8(byteAsString, radix: 2) else {
-                    print("failed to create byte from string: \(byteAsString)")
-                    fatalError("failed to create byte from string: \(byteAsString)")
-                }
-                bytes.append(byte)
-                partialBinaryString = String(partialBinaryString.dropFirst(bitsPerByte))
-            }
-            return Data(bytes)
-        }
-        let data = dataFromBinaryString(String(binaryString.prefix(binaryString.count - checksumLength)))
-
+        assert(bitStringFromIndex.count == mnemonicWords.count * 11)
+        let bitArray = BitArray(binaryString: bitStringFromIndex)!
+        let checksumLength = mnemonicWords.count / 3
+        let dataBits = bitArray.prefix(subtractFromCount: checksumLength)
+        let checksumBits = bitArray.suffix(maxBitCount: checksumLength)
+        let data = dataBits.asData()
         let hash = Crypto.sha256(data)
-        let checksumFromHashWholeByte: UInt8 = hash[0]
-
-        guard
-            case let relevantBits = String(checksumFromHashWholeByte, radix: 2).prefix(checksumLength),
-            let checksumFromHashOnlyRelevantBits = UInt8(relevantBits, radix: 2) else {
-            fatalError("should work to get relevant bits from checksum and fit in a single byte (assuming a max entropy of 256 bits)")
-        }
-
-        guard checksumFromHashOnlyRelevantBits == expectedChecksum else {
+        let hashBinary = BitArray(data: hash)
+        let hashPadded = hashBinary.appending(element: false, toLength: 256)
+        let hashBits = hashPadded.prefix(maxBitCount: checksumLength)
+        guard hashBits == checksumBits else {
             throw MnemonicError.invalid(.checksumMismatch)
         }
 
@@ -207,35 +186,27 @@ public struct Mnemonic {
       }
 
     internal static func generate(entropy: Data, language: Language = .english) -> [String] {
-        let list = wordList(for: language)
-        var binaryString = entropy.map { byteToBinString(byte: $0) }.joined()
-
+       let entropybits = String(entropy.flatMap { ("00000000" + String($0, radix: 2)).suffix(bitsPerByte) })
         let hash = Crypto.sha256(entropy)
-        let bits = entropy.count * 8
-        let cs = bits / 32
+        let hashBits = String(hash.flatMap { ("00000000" + String($0, radix: 2)).suffix(bitsPerByte) })
+        let checkSum = String(hashBits.prefix((entropy.count * bitsPerByte) / 32))
 
-        let hashbits = hash.map { byteToBinString(byte: $0) }.joined()
-        let checksum = String(hashbits.prefix(cs))
-        binaryString += checksum
+        let words = wordList(for: language)
+        let concatenatedBits = entropybits + checkSum
 
-        var mnemonic = [String]()
-        let wordCount = Mnemonic.Strength.wordCountFrom(entropyInBits: binaryString.count)
-
-        for nextWordIndex in 0..<wordCount {
-            let rangeStart = binaryString.index(binaryString.startIndex, offsetBy: nextWordIndex * 11)
-            let rangeEnd = binaryString.index(binaryString.startIndex, offsetBy: (nextWordIndex + 1) * 11)
-            let range = rangeStart..<rangeEnd
-            let bitsInRange = binaryString[range]
-            let wordIndex = Int(bitsInRange, radix: 2)!
-
-            let mnemonicWord = list[wordIndex]
-            mnemonic.append(mnemonicWord)
+        var mnemonic: [String] = []
+        for index in 0..<(concatenatedBits.count / wordListSizeLog2) {
+            let startIndex = concatenatedBits.index(concatenatedBits.startIndex, offsetBy: index * wordListSizeLog2)
+            let endIndex = concatenatedBits.index(startIndex, offsetBy: wordListSizeLog2)
+            let wordIndex = Int(strtoul(String(concatenatedBits[startIndex..<endIndex]), nil, 2))
+            mnemonic.append(String(words[wordIndex]))
         }
+
         return mnemonic
     }
 
     public static func seed(mnemonic words: [String], passphrase: String = "") throws -> Data {
-//        try validateChecksumDerivingLanguageOf(mnemonic: words)
+        try validateChecksumDerivingLanguageOf(mnemonic: words)
         let mnemonic = words.joined(separator: " ").decomposedStringWithCompatibilityMapping.data(using: .utf8)!
         let salt = ("mnemonic" + passphrase).decomposedStringWithCompatibilityMapping.data(using: .utf8)!
         let seed = _Key.deriveKey(mnemonic, salt: salt, iterations: 2048, keyLength: 64)
@@ -264,6 +235,92 @@ public struct Mnemonic {
     }
 }
 
+struct UInt11: ExpressibleByIntegerLiteral {
+    static var bitWidth: Int { 11 }
+
+    static var max16: UInt16 { UInt16(2047) }
+    static var max: UInt11 { UInt11(exactly: max16)! }
+
+    static var min: UInt11 { 0 }
+
+    private let valueBoundBy16Bits: UInt16
+
+    init?<T>(exactly source: T) where T: BinaryInteger {
+        guard
+            let valueBoundBy16Bits = UInt16(exactly: source),
+            valueBoundBy16Bits < 2048 else { return nil }
+
+        self.valueBoundBy16Bits = valueBoundBy16Bits
+    }
+
+}
+
+extension UInt11 {
+    init<T>(truncatingIfNeeded source: T) where T: BinaryInteger {
+         let valueBoundBy16Bits = UInt16(truncatingIfNeeded: source)
+         self.valueBoundBy16Bits = Swift.min(UInt11.max16, valueBoundBy16Bits)
+     }
+
+     /// Creates a new integer value from the given string and radix.
+     init?<S>(_ text: S, radix: Int = 10) where S: StringProtocol {
+         guard let uint16 = UInt16(text, radix: radix) else { return nil }
+         self.init(exactly: uint16)
+     }
+
+    init(integerLiteral value: Int) {
+        guard let exactly = UInt11(exactly: value) else {
+            fatalError("bad integer literal value does not fit in UInt11, value passed was: \(value)")
+        }
+        self = exactly
+    }
+}
+
+extension UInt11 {
+    var binaryString: String {
+        let binaryString = String(valueBoundBy16Bits.binaryString.suffix(Self.bitWidth))
+        assert(UInt16(binaryString, radix: 2)! == valueBoundBy16Bits, "expected '\(UInt16(binaryString, radix: 2)!)' to equal: '\(valueBoundBy16Bits)', bound.valueBoundBy16Bits.binaryString: \(valueBoundBy16Bits.binaryString), self.binaryString: \(binaryString)")
+        return binaryString
+
+//        var result: [String] = []
+//        for i in 0..<(Self.bitWidth / 8) {
+//            let byte = UInt8(truncatingIfNeeded: self >> (i * 8))
+//            let byteString = String(byte, radix: 2)
+//            let padding = String(repeating: "0",
+//                                 count: 8 - byteString.count)
+//            result.append(padding + byteString)
+//        }
+//        return "0b" + result.reversed().joined(separator: "_")
+    }
+}
+
+extension FixedWidthInteger {
+    var binaryString: String {
+        var result: [String] = []
+        for i in 0..<(Self.bitWidth / 8) {
+            let byte = UInt8(truncatingIfNeeded: self >> (i * 8))
+            let byteString = String(byte, radix: 2)
+            let padding = String(repeating: "0",
+                                 count: 8 - byteString.count)
+            result.append(padding + byteString)
+        }
+        return result.reversed().joined()
+    }
+}
+
+extension Data {
+    var binaryString: String {
+        var result: [String] = []
+        for byte in self {
+//            let byte = UInt8(truncatingIfNeeded: self >> (i * 8))
+            let byteString = String(byte, radix: 2)
+            let padding = String(repeating: "0",
+                                 count: 8 - byteString.count)
+            result.append(padding + byteString)
+        }
+        return result.joined()
+    }
+}
+
 public enum MnemonicError: Error {
     case randomBytesError
 
@@ -275,7 +332,6 @@ public enum MnemonicError: Error {
         case checksumMismatch
     }
 }
-
 private extension BinaryInteger {
     var asData: Data {
         var int = self
@@ -283,37 +339,35 @@ private extension BinaryInteger {
     }
 }
 
-enum ConcatMode {
-    case prepend
-    case append
-}
+extension RangeReplaceableCollection {
 
-extension String {
-    func append(character: Character, toLength expectedLength: Int?) -> String {
-        return prependingOrAppending(character: character, toLength: expectedLength, mode: .append)
+    mutating func prepend(element: Element, toLength expectedLength: Int?) {
+        self = prepending(element: element, toLength: expectedLength)
     }
 
-    func prepending(character: Character, toLength expectedLength: Int?) -> String {
-        return prependingOrAppending(character: character, toLength: expectedLength, mode: .prepend)
-    }
-
-    mutating func prependOrAppend(character: Character, toLength expectedLength: Int?, mode: ConcatMode) {
-        self = prependingOrAppending(character: character, toLength: expectedLength, mode: mode)
-    }
-
-    func prependingOrAppending(character: Character, toLength expectedLength: Int?, mode: ConcatMode) -> String {
+    func prepending(element: Element, toLength expectedLength: Int?) -> Self {
         guard let expectedLength = expectedLength else {
             return self
         }
         var modified = self
-        let new = String(character)
         while modified.count < expectedLength {
-            switch mode {
-            case .prepend: modified = new + modified
-            case .append: modified += new
-            }
-
+            modified = [element] + modified
         }
         return modified
     }
+
+    mutating func append(element: Element, toLength expectedLength: Int?) {
+          self = appending(element: element, toLength: expectedLength)
+      }
+
+      func appending(element: Element, toLength expectedLength: Int?) -> Self {
+          guard let expectedLength = expectedLength else {
+              return self
+          }
+          var modified = self
+          while modified.count < expectedLength {
+            modified.append(element)
+          }
+          return modified
+      }
 }

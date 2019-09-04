@@ -445,10 +445,10 @@ private extension MnemonicTests {
             } catch {
                 XCTFail("Error: \(error)")
             }
-            XCTAssertNoThrow(try Mnemonic.validateChecksumOf(mnemonic: words, language: .english))
+            XCTAssertNoThrow(try Mnemonic.validateChecksumOf(mnemonic: words, language: .english), "validation of vector with mnemonic failed: '\(words)'")
 
         let firstWordInVocabulary = WordList.english.first!
-        XCTAssertNotEqual(words[0], firstWordInVocabulary) // assert that we dont have such bad luck that the first 
+        XCTAssertNotEqual(words[0], firstWordInVocabulary) // assert that we dont have such bad luck that the first
         let mnemonicFirstWordReplaced: [String] = { var tmp = words; tmp[0] = firstWordInVocabulary; return tmp }()
 
         XCTAssertThrowsError(try Mnemonic.validateChecksumOf(mnemonic: mnemonicFirstWordReplaced, language: .english), "mnemonic with non checksummed words should throw error") { error in
@@ -485,6 +485,18 @@ private let checksumVectorsWordCountOf12: [ChecksumVector] = [
         checksummed: "chaos bachelor bread brown palm little cube toy reveal tone legal mushroom",
         expectedBIP39SeedHex: "efa9a923fbc3b9b0825d4f73a8620046ba03c75145c774183820c4e729f603b1d29471ad4d9a38f5cfffb7ae7eddeada4e7428a2c0d8f35df0dc882b2ec20556",
         bip44BTCMainnetIndex0PrivateKeyWIF: "KyZ2jCAwGa2QmekquQAqp7aSBYGMo2RDcFDAsE3vyBX224CYQAdP"
+    ),
+
+    V(
+        checksummed: "history repair able sun resemble health remind gloom put hunt bridge cause",
+        expectedBIP39SeedHex: "24ad1ea7a8a21f3c8a9a9b65b0bcf34369502ed2b5a6c4b2d6c81556775b9f2ff02ab3a528c4f67d55145d0a713fd0f8b9d94bfb6f172470b5d4a5ee168f4720",
+        bip44BTCMainnetIndex0PrivateKeyWIF: "Kx3Ap21MCouj1mXrZ62Lc2gvo3srs5H8MDa5kezjuLMukBJM7ScM"
+    ),
+
+    V(
+        checksummed: "quit roast phone very umbrella settle gasp barely risk junior idea dignity",
+        expectedBIP39SeedHex: "b149811563a2d128b81f0f450bc96223d0514e24ade0b9946b61f062368a0ccf120101921b3c6d869c49df1389494444807abd3be425166d6ea016714fe125c6",
+        bip44BTCMainnetIndex0PrivateKeyWIF: "L21oetMcVJGpzYNFLGarzAvt3pFT9dcCSDNLSoEDPpJuH2ATJ1Ez"
     )
 ]
 
