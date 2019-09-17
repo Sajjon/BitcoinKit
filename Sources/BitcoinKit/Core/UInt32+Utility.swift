@@ -1,7 +1,6 @@
 //
-//  OpenSSL.h
+//  UInt32+Utility.swift
 //
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
 //  Copyright © 2018 BitcoinKit developers
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,32 +22,10 @@
 //  THE SOFTWARE.
 //
 
+import Foundation
 
-#import <Foundation/Foundation.h>
-
-NS_ASSUME_NONNULL_BEGIN
-@interface _Hash : NSObject
-
-+ (NSData *)sha1:(NSData *)data;
-+ (NSData *)sha256:(NSData *)data;
-+ (NSData *)sha256ripemd160:(NSData *)data;
-+ (NSData *)ripemd160:(NSData *)data;
-+ (NSData *)hmacsha512:(NSData *)data key:(NSData *)key;
-
-@end
-
-@interface _Key : NSObject
-+ (NSData *)deriveKey:(NSData *)password salt:(NSData *)salt iterations:(NSInteger)iterations keyLength:(NSInteger)keyLength;
-
-@end
-
-@interface _EllipticCurve : NSObject
-+ (NSData *)multiplyECPointX:(NSData *)ecPointX andECPointY:(NSData *)ecPointY withScalar:(NSData *)scalar;
-+ (NSData *)decodePointOnCurveForCompressedPublicKey:(NSData *)publicKeyCompressed;
-@end
-
-@interface _Crypto : NSObject
-+ (NSData *)signMessage:(NSData *)message withPrivateKey:(NSData *)privateKey;
-+ (BOOL)verifySignature:(NSData *)signature message:(NSData *)message  publicKey:(NSData *)publicKey;
-@end
-NS_ASSUME_NONNULL_END
+extension UInt32 {
+	public var hex: String {
+		return String(format: "%08x", self)
+	}
+}

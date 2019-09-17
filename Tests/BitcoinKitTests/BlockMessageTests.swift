@@ -1,5 +1,5 @@
 //
-//  BitcoinKitDataStoreProtocol.swift
+//  BlockMessageTests.swift
 //
 //  Copyright © 2018 BitcoinKit developers
 //
@@ -22,33 +22,34 @@
 //  THE SOFTWARE.
 //
 
-import Foundation
+import XCTest
+@testable import BitcoinKit
 
-// MARK: - BitcoinKitDataStoreProtocol
-public protocol BitcoinKitDataStoreProtocol {
-    func getString(forKey key: String) -> String?
-    func setString(_ value: String, forKey key: String)
-    func getData(forKey key: String) -> Data?
-    func setData(_ value: Data, forKey key: String)
-}
+class BlockMessageTests: XCTestCase {
+    fileprivate func loadRawBlock(named name: String) throws -> BlockMessage {
+        let data: Data
+        #if BitcoinKitXcode
+        let url = Bundle(for: type(of: self)).url(forResource: name, withExtension: "raw")!
+        data = try Data(contentsOf: url)
+        #else
+        // find raw files if using Swift Package Manager:
+        let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let fileURL = currentDirectoryURL
+            .appendingPathComponent("TestResources", isDirectory: true)
+            .appendingPathComponent(name)
+            .appendingPathExtension("raw")
+        data = try Data(contentsOf: fileURL)
+        #endif
 
-internal enum DataStoreKey: String {
-    case wif, utxos, transactions
-}
-
-internal extension BitcoinKitDataStoreProtocol {
-    func getString(forKey key: DataStoreKey) -> String? {
-        return getString(forKey: key.rawValue)
-    }
-    func setString(_ value: String, forKey key: DataStoreKey) {
-        setString(value, forKey: key.rawValue)
-    }
-
-    func getData(forKey key: DataStoreKey) -> Data? {
-        return getData(forKey: key.rawValue)
+        return BlockMessage.deserialize(data)
     }
 
-    func setData(_ value: Data, forKey key: DataStoreKey) {
-        setData(value, forKey: key.rawValue)
+    func testComputeMerkleRoot() throws {
+        let block1 = try loadRawBlock(named: "block1")
+        XCTAssertEqual(block1.computeMerkleRoot(), block1.merkleRoot)
+
+        let block413567 = try loadRawBlock(named: "block413567")
+        XCTAssertEqual(block413567.computeMerkleRoot(), block413567.merkleRoot)
     }
+    
 }
