@@ -72,7 +72,7 @@ public struct PrivateKey {
         var key = Data(count: count)
         var status: Int32 = 0
         repeat {
-            status = key.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, count, $0) }
+            status = key.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, count, $0.baseAddress.unsafelyUnwrapped) }
         } while (status != 0 || !check([UInt8](key)))
 
         self.data = key
@@ -119,11 +119,11 @@ public struct PrivateKey {
     }
 
     private func computePublicKeyData() -> Data {
-        return _Key.computePublicKey(fromPrivateKey: data, compression: isPublicKeyCompressed)
+        return _SwiftKey.computePublicKey(fromPrivateKey: data, compression: isPublicKeyCompressed)
     }
 
     public func publicKeyPoint() throws -> PointOnCurve {
-        let xAndY: Data = _Key.computePublicKey(fromPrivateKey: data, compression: false)
+        let xAndY: Data = _SwiftKey.computePublicKey(fromPrivateKey: data, compression: false)
         let expectedLengthOfScalar = Scalar32Bytes.expectedByteCount
         let expectedLengthOfKey = expectedLengthOfScalar * 2
         guard xAndY.count == expectedLengthOfKey else {

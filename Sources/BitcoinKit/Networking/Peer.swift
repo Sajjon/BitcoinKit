@@ -90,8 +90,8 @@ public class Peer: NSObject, StreamDelegate {
         inputStream.delegate = self
         outputStream.delegate = self
 
-        inputStream.schedule(in: .current, forMode: .commonModes)
-        outputStream.schedule(in: .current, forMode: .commonModes)
+        inputStream.schedule(in: .current, forMode: .common)
+        outputStream.schedule(in: .current, forMode: .common)
 
         inputStream.open()
         outputStream.open()
@@ -104,8 +104,9 @@ public class Peer: NSObject, StreamDelegate {
 
         inputStream.delegate = nil
         outputStream.delegate = nil
-        inputStream.remove(from: .current, forMode: .commonModes)
-        outputStream.remove(from: .current, forMode: .commonModes)
+        inputStream.remove(from: .current, forMode: .common)
+        outputStream.remove(from: .current, forMode: .common)
+
         inputStream.close()
         outputStream.close()
         readStream = nil
@@ -244,7 +245,9 @@ public class Peer: NSObject, StreamDelegate {
     private func sendMessage(_ message: Message) {
         log("sending \(message.command)")
         let data = message.serialized()
-        _ = data.withUnsafeBytes { outputStream.write($0, maxLength: data.count) }
+        data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> Void in
+            outputStream.write(ptr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, maxLength: data.count)
+        }
     }
 
     private func sendVersionMessage() {

@@ -1,19 +1,31 @@
-![BitcoinKit: Let’s Play with Bitcoin in Swift!](https://user-images.githubusercontent.com/23519083/44261174-cc64aa00-a251-11e8-85b6-145e0bcae102.jpg)
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/23519083/44261174-cc64aa00-a251-11e8-85b6-145e0bcae102.jpg" alt="BitcoinKit: Let’s Play with Bitcoin in Swift!">
+    <a href="https://travis-ci.org/yenom/BitcoinKit">
+      <img src="http://img.shields.io/travis/yenom/BitcoinKit.svg" alt="TravisCI">
+    </a>
+    <a href="https://codecov.io/gh/yenom/BitcoinKit">
+      <img src="https://codecov.io/gh/yenom/BitcoinKit/branch/master/graph/badge.svg" />
+    </a>
+    <a href="https://swift.org">
+        <img src="http://img.shields.io/badge/swift-5.0+-brightgreen.svg" alt="Swift 5.0+">
+    </a>
+    <a href="https://github.com/Carthage/Carthage">
+        <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" alt="Carthage">
+    </a>
+    <a href="https://swift.org/package-manager">
+        <img src="https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat" alt="Swift Package Manager" />
+    </a>
+    <a href="http://cocoadocs.org/docsets/BitcoinKit">
+        <img src="https://img.shields.io/cocoapods/v/BitcoinKit.svg" alt="CococaPods" />
+    </a>
+</p>
 
-[![CI Status](http://img.shields.io/travis/yenom/BitcoinKit.svg)](https://travis-ci.org/yenom/BitcoinKit)
-[![codecov](https://codecov.io/gh/yenom/BitcoinKit/branch/master/graph/badge.svg)](https://codecov.io/gh/yenom/BitcoinKit)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Version](https://img.shields.io/cocoapods/v/BitcoinKit.svg)](http://cocoadocs.org/docsets/BitcoinKit)
-[![Platform](https://img.shields.io/cocoapods/p/BitcoinKit.svg)](http://cocoadocs.org/docsets/BitcoinKit)
-[![Backers on Open Collective](https://opencollective.com/BitcoinKit/backers/badge.svg)](#backers) 
-[![Sponsors on Open Collective](https://opencollective.com/BitcoinKit/sponsors/badge.svg)](#sponsors) 
 
 ### Welcome to BitcoinKit
 
-The BitcoinKit library is a Swift implementation of the Bitcoin protocol, supporting both of BCH and BTC. 
-Our mission is improving the mobile ecosystem for Bitcoin developers.
+The BitcoinKit library is a Swift implementation of the Bitcoin protocol which support both BCH and BTC. Improving the mobile ecosystem for Bitcoin developers is our mission.
 
-It allows maintaining a wallet and sending/receiving transactions without needing a full blockchain node. It comes with a simple wallet app showing how to use it.
+BitcoinKit allows maintaining a wallet, sending or receiving transactions without a full blockchain node. Following is a wallet app that demonstrates the way to use it.
 
 Release notes are [here](CHANGELOG.md).
 
@@ -117,8 +129,8 @@ let peerGroup.start()
 Requirements
 ------------
 - iOS 9.0+ / Mac OS X 10.11+ / tvOS 9.0+ / watchOS 2.0+
-- Xcode 9.0+
-- Swift 4.1+
+- Xcode 10.0+
+- Swift 5.0+
 
 Installation
 ------------
@@ -176,7 +188,7 @@ BitcoinKit is available through [Swift Package Manager](https://github.com/apple
 it, simply add the following lines to dependencies of your Package.swift:
 
 ```swift
-.package(url: "https://github.com/yenom/BitcoinKit.git", .upToNextMinor(from: "0.1.0"))
+.package(url: "https://github.com/yenom/BitcoinKit.git", .upToNextMinor(from: "1.0.0"))
 ```
 
 Note that following data types and features are currently not supported on Linux platform.  

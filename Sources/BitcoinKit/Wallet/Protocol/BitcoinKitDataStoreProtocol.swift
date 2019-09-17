@@ -43,9 +43,11 @@ internal extension BitcoinKitDataStoreProtocol {
     func setString(_ value: String, forKey key: DataStoreKey) {
         setString(value, forKey: key.rawValue)
     }
+
     func getData(forKey key: DataStoreKey) -> Data? {
         return getData(forKey: key.rawValue)
     }
+
     func setData(_ value: Data, forKey key: DataStoreKey) {
         setData(value, forKey: key.rawValue)
     }

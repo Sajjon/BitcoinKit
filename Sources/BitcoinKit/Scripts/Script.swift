@@ -411,7 +411,7 @@ public class Script {
 
     public func subScript(from index: Int) throws -> Script {
         let subScript: Script = Script()
-        for chunk in chunks[Range(index..<chunks.count)] {
+        for chunk in chunks[index..<chunks.count] {
             try subScript.appendData(chunk.chunkData)
         }
         return subScript
@@ -419,7 +419,7 @@ public class Script {
 
     public func subScript(to index: Int) throws -> Script {
         let subScript: Script = Script()
-        for chunk in chunks[Range(0..<index)] {
+        for chunk in chunks[0..<index] {
             try subScript.appendData(chunk.chunkData)
         }
         return subScript
@@ -474,8 +474,13 @@ extension Script {
     // Standard Transaction to Bitcoin address (pay-to-pubkey-hash)
     // scriptPubKey: OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
     public static func buildPublicKeyHashOut(pubKeyHash: Data) -> Data {
-        let tmp: Data = Data() + OpCode.OP_DUP + OpCode.OP_HASH160 + UInt8(pubKeyHash.count) + pubKeyHash + OpCode.OP_EQUALVERIFY
-        return tmp + OpCode.OP_CHECKSIG
+        let script = try! Script()
+            .append(.OP_DUP)
+            .append(.OP_HASH160)
+            .appendData(pubKeyHash)
+            .append(.OP_EQUALVERIFY)
+            .append(.OP_CHECKSIG)
+        return script.data
     }
 
     public static func buildPublicKeyUnlockingScript(signature: Data, pubkey: PublicKey, hashType: SighashType) -> Data {
