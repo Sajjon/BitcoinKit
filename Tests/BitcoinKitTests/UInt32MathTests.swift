@@ -1,7 +1,6 @@
 //
-//  OpenSSL.h
+//  UInt32MathTests.swift
 //
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
 //  Copyright © 2018 BitcoinKit developers
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,32 +22,40 @@
 //  THE SOFTWARE.
 //
 
+import XCTest
+@testable import BitcoinKit
 
-#import <Foundation/Foundation.h>
-
-NS_ASSUME_NONNULL_BEGIN
-@interface _Hash : NSObject
-
-+ (NSData *)sha1:(NSData *)data;
-+ (NSData *)sha256:(NSData *)data;
-+ (NSData *)sha256ripemd160:(NSData *)data;
-+ (NSData *)ripemd160:(NSData *)data;
-+ (NSData *)hmacsha512:(NSData *)data key:(NSData *)key;
-
-@end
-
-@interface _Key : NSObject
-+ (NSData *)deriveKey:(NSData *)password salt:(NSData *)salt iterations:(NSInteger)iterations keyLength:(NSInteger)keyLength;
-
-@end
-
-@interface _EllipticCurve : NSObject
-+ (NSData *)multiplyECPointX:(NSData *)ecPointX andECPointY:(NSData *)ecPointY withScalar:(NSData *)scalar;
-+ (NSData *)decodePointOnCurveForCompressedPublicKey:(NSData *)publicKeyCompressed;
-@end
-
-@interface _Crypto : NSObject
-+ (NSData *)signMessage:(NSData *)message withPrivateKey:(NSData *)privateKey;
-+ (BOOL)verifySignature:(NSData *)signature message:(NSData *)message  publicKey:(NSData *)publicKey;
-@end
-NS_ASSUME_NONNULL_END
+class UInt32MathTests: XCTestCase {
+	
+	override func setUp() {
+		super.setUp()
+	}
+	
+	override func tearDown() {
+		super.tearDown()
+	}
+	
+	func test1() {
+		XCTAssertEqual(ceil_log2(0), 0)
+		XCTAssertEqual(ceil_log2(1), 0)
+		XCTAssertEqual(ceil_log2(2), 1)
+		XCTAssertEqual(ceil_log2(3), 2)
+		XCTAssertEqual(ceil_log2(4), 2)
+		XCTAssertEqual(ceil_log2(5), 3)
+		XCTAssertEqual(ceil_log2(6), 3)
+		XCTAssertEqual(ceil_log2(7), 3)
+		XCTAssertEqual(ceil_log2(8), 3)
+		XCTAssertEqual(ceil_log2(9), 4)
+		XCTAssertEqual(ceil_log2(10), 4)
+		XCTAssertEqual(ceil_log2(11), 4)
+		XCTAssertEqual(ceil_log2(12), 4)
+		XCTAssertEqual(ceil_log2(13), 4)
+		XCTAssertEqual(ceil_log2(14), 4)
+		XCTAssertEqual(ceil_log2(15), 4)
+		XCTAssertEqual(ceil_log2(16), 4)
+		XCTAssertEqual(ceil_log2(17), 5)
+		
+		XCTAssertEqual(ceil_log2(UInt32.max-1), 32)
+		XCTAssertEqual(ceil_log2(UInt32.max), 32)
+	}
+}

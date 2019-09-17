@@ -1,7 +1,6 @@
 //
-//  OpenSSL.h
+//  UInt256+Bitcoin.swift
 //
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
 //  Copyright © 2018 BitcoinKit developers
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,32 +22,31 @@
 //  THE SOFTWARE.
 //
 
+import Foundation
 
-#import <Foundation/Foundation.h>
-
-NS_ASSUME_NONNULL_BEGIN
-@interface _Hash : NSObject
-
-+ (NSData *)sha1:(NSData *)data;
-+ (NSData *)sha256:(NSData *)data;
-+ (NSData *)sha256ripemd160:(NSData *)data;
-+ (NSData *)ripemd160:(NSData *)data;
-+ (NSData *)hmacsha512:(NSData *)data key:(NSData *)key;
-
-@end
-
-@interface _Key : NSObject
-+ (NSData *)deriveKey:(NSData *)password salt:(NSData *)salt iterations:(NSInteger)iterations keyLength:(NSInteger)keyLength;
-
-@end
-
-@interface _EllipticCurve : NSObject
-+ (NSData *)multiplyECPointX:(NSData *)ecPointX andECPointY:(NSData *)ecPointY withScalar:(NSData *)scalar;
-+ (NSData *)decodePointOnCurveForCompressedPublicKey:(NSData *)publicKeyCompressed;
-@end
-
-@interface _Crypto : NSObject
-+ (NSData *)signMessage:(NSData *)message withPrivateKey:(NSData *)privateKey;
-+ (BOOL)verifySignature:(NSData *)signature message:(NSData *)message  publicKey:(NSData *)publicKey;
-@end
-NS_ASSUME_NONNULL_END
+extension UInt256 {
+	public enum CompactError: Error {
+		case negative, overflow
+	}
+	// bitcoin "compact" format
+	public init(compact: UInt32) throws {
+		let size: UInt32 = compact >> 24
+		let target: UInt32 = compact & 0x007fffff
+		if target == 0 {
+			self = UInt256.zero
+		} else {
+    		// The 0x00800000 denotes the sign
+    		if (compact & 0x00800000) != 0 {
+    			throw CompactError.negative
+    		}
+    		if size > 0x22 || (target > 0xff && size > 0x21) || (target > 0xffff && size > 0x20) {
+    			throw CompactError.overflow
+    		}
+    		if size < 3 {
+    			self = UInt256(target) >> ((3 - size) * 8)
+    		} else {
+    			self = UInt256(target) << ((size - 3) * 8)
+    		}
+		}
+	}
+}

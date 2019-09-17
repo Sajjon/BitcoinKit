@@ -7,6 +7,11 @@
 //
 
 import Foundation
+#if BitcoinKitXcode
+import BitcoinKit.Private
+#else
+import BitcoinKitPrivate
+#endif
 
 public struct PointOnCurve {
 
@@ -26,9 +31,7 @@ public struct PointOnCurve {
     }
 }
 
-#if BitcoinKitXcode
 public extension PointOnCurve {
-
     enum Error: Swift.Error {
         case multiplicationResultedInTooFewBytes(expected: Int, butGot: Int)
         case expectedUncompressedPoint
@@ -45,6 +48,21 @@ public extension PointOnCurve {
         return try PointOnCurve.decodePointFrom(xAndYPrefixedWithCompressionType: data)
     }
 
+    private static func decodePointFrom(xAndYPrefixedWithCompressionType data: Data) throws -> PointOnCurve {
+        var xAndY = data
+        guard xAndY[0] == PointOnCurve.byteForUncompressed else {
+            throw Error.expectedUncompressedPoint
+        }
+        xAndY = Data(xAndY.dropFirst())
+        let expectedByteCount = Scalar32Bytes.expectedByteCount * 2
+        guard xAndY.count == expectedByteCount else {
+            throw Error.multiplicationResultedInTooFewBytes(expected: expectedByteCount, butGot: xAndY.count)
+        }
+        let resultX = xAndY.prefix(Scalar32Bytes.expectedByteCount)
+        let resultY = xAndY.suffix(Scalar32Bytes.expectedByteCount)
+        return try PointOnCurve(x: resultX, y: resultY)
+    }
+
     func multiplyBy(scalar: Scalar32Bytes) throws -> PointOnCurve {
         let xAndY = _EllipticCurve.multiplyECPointX(x.data, andECPointY: y.data, withScalar: scalar.data)
         return try PointOnCurve.decodePointFrom(xAndYPrefixedWithCompressionType: xAndY)
@@ -59,21 +77,3 @@ public extension PointOnCurve {
         return try multiplyBy(scalar: scalar)
     }
 }
-
-private extension PointOnCurve {
-    static func decodePointFrom(xAndYPrefixedWithCompressionType data: Data) throws -> PointOnCurve {
-        var xAndY = data
-        guard xAndY[0] == PointOnCurve.byteForUncompressed else {
-            throw Error.expectedUncompressedPoint
-        }
-        xAndY = Data(xAndY.dropFirst())
-        let expectedByteCount = Scalar32Bytes.expectedByteCount * 2
-        guard xAndY.count == expectedByteCount else {
-            throw Error.multiplicationResultedInTooFewBytes(expected: expectedByteCount, butGot: xAndY.count)
-        }
-        let resultX = xAndY.prefix(Scalar32Bytes.expectedByteCount)
-        let resultY = xAndY.suffix(Scalar32Bytes.expectedByteCount)
-        return try PointOnCurve(x: resultX, y: resultY)
-    }
-}
-#endif

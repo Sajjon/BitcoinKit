@@ -62,9 +62,11 @@ public struct VarInt: ExpressibleByIntegerLiteral {
         case 0x10000...0xffffffff:
             length = 4
             data = Data() + UInt8(0xfe).littleEndian + UInt32(value).littleEndian
-        default: // 0x100000000...0xffffffffffffffff:
+        case 0x100000000...0xffffffffffffffff:
             length = 8
             data = Data() + UInt8(0xff).littleEndian + UInt64(value).littleEndian
+        default:
+            fatalError("This switch statement should be exhaustive without default clause")
         }
     }
 

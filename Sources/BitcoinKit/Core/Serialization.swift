@@ -91,7 +91,10 @@ extension Data {
     }
 
     func to<T>(type: T.Type) -> T {
-        return self.withUnsafeBytes { $0.pointee }
+        var data = Data(count: MemoryLayout<T>.size)
+        // Doing this for aligning memory layout
+        _ = data.withUnsafeMutableBytes { self.copyBytes(to: $0) }
+        return data.withUnsafeBytes { $0.load(as: T.self) }
     }
 
     func to(type: String.Type) -> String {
@@ -108,8 +111,10 @@ extension Data {
             value = UInt64(self[1...2].to(type: UInt16.self))
         case 0xfe:
             value = UInt64(self[1...4].to(type: UInt32.self))
-        default: // 0xff
+        case 0xff:
             value = self[1...8].to(type: UInt64.self)
+        default:
+            fatalError("This switch statement should be exhaustive without default clause")
         }
         return VarInt(value)
     }

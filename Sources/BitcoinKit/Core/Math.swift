@@ -1,9 +1,8 @@
 //
-//  OpenSSL.h
+//  Math.swift
 //
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
 //  Copyright © 2018 BitcoinKit developers
-//
+///
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
@@ -21,34 +20,18 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-//
+///
 
+import Foundation
 
-#import <Foundation/Foundation.h>
-
-NS_ASSUME_NONNULL_BEGIN
-@interface _Hash : NSObject
-
-+ (NSData *)sha1:(NSData *)data;
-+ (NSData *)sha256:(NSData *)data;
-+ (NSData *)sha256ripemd160:(NSData *)data;
-+ (NSData *)ripemd160:(NSData *)data;
-+ (NSData *)hmacsha512:(NSData *)data key:(NSData *)key;
-
-@end
-
-@interface _Key : NSObject
-+ (NSData *)deriveKey:(NSData *)password salt:(NSData *)salt iterations:(NSInteger)iterations keyLength:(NSInteger)keyLength;
-
-@end
-
-@interface _EllipticCurve : NSObject
-+ (NSData *)multiplyECPointX:(NSData *)ecPointX andECPointY:(NSData *)ecPointY withScalar:(NSData *)scalar;
-+ (NSData *)decodePointOnCurveForCompressedPublicKey:(NSData *)publicKeyCompressed;
-@end
-
-@interface _Crypto : NSObject
-+ (NSData *)signMessage:(NSData *)message withPrivateKey:(NSData *)privateKey;
-+ (BOOL)verifySignature:(NSData *)signature message:(NSData *)message  publicKey:(NSData *)publicKey;
-@end
-NS_ASSUME_NONNULL_END
+func ceil_log2(_ x: UInt32) -> UInt32 {
+	if x == 0 { return 0 }
+    guard x > 1 else { return 0 }
+    var xx: UInt32 = x - 1
+    var r: UInt32 = 0
+	while xx > 0 {
+		xx >>= 1
+		r += 1
+	}
+	return r
+}
