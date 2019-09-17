@@ -61,7 +61,7 @@ class ScriptMachineTests: XCTestCase {
         let hashType: SighashType = SighashType.BTC.ALL
         let utxoToSign = TransactionOutput(value: balance, lockingScript: subScript)
         let _txHash = unsignedTx.signatureHash(for: utxoToSign, inputIndex: 0, hashType: hashType)
-        guard let signature: Data = try? Crypto.sign(_txHash, privateKey: privateKey) else {
+        guard let signature: Data = try? ECDSA().sign(_txHash, privateKey: privateKey) else {
             XCTFail("Failed to sign tx.")
             return
         }
@@ -80,7 +80,7 @@ class ScriptMachineTests: XCTestCase {
         do {
             let sigData: Data = signature + UInt8(hashType)
             let pubkeyData: Data = fromPublicKey.data
-            let result = try Crypto.verifySigData(for: signedTx, inputIndex: 0, utxo: utxoToSign, sigData: sigData, pubKeyData: pubkeyData)
+            let result = try ECDSA().verifySigData(for: signedTx, inputIndex: 0, utxo: utxoToSign, sigData: sigData, pubKeyData: pubkeyData)
             XCTAssertTrue(result)
         } catch (let err) {
             XCTFail("Crypto verifySigData failed. \(err)")

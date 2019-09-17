@@ -47,7 +47,7 @@ class CryptoTests: XCTestCase {
         let pk = Data(hex: "16f243e962c59e71e54189e67e66cf2440a1334514c09c00ddcc21632bac9808")!
         let privateKey = PrivateKey(data: pk)
 
-        let signature = try? Crypto.sign(msg, privateKey: privateKey)
+        let signature = try? ECDSA().sign(msg, privateKey: privateKey)
 
         XCTAssertNotNil(signature)
         XCTAssertEqual(signature?.hex, "3044022055f4b20035cbb2e85b7a04a0874c80d5822758f4e47a9a69db04b29f8b218f920220491e6a13296cfe2186da3a3ca565a179def3808b12d184553a8e3acfe1467273")

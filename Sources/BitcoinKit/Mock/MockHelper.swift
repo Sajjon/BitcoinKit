@@ -82,7 +82,7 @@ public struct MockHelper {
 
         // signature, unlockScript(scriptSig)
         let hashType = SighashType.BCH.ALL
-        let signature: Data = key.privkey.sign(txMock, utxoToSign: utxoMock, hashType: hashType)
+        let signature: Data = try! key.privkey.signTransaction(txMock, utxoToSign: utxoMock, hashType: hashType)
         let sigWithHashType: Data = signature + UInt8(hashType)
         let pair: SigKeyPair = SigKeyPair(sigWithHashType, key.pubkey)
         let unlockScript: Script = unlockScriptBuilder.build(pairs: [pair])
@@ -106,7 +106,7 @@ public struct MockHelper {
         let hashType = SighashType.BCH.ALL
         var sigKeyPairs: [SigKeyPair] = []
         for key in keys {
-            let signature: Data = key.privkey.sign(txMock, utxoToSign: utxoMock, hashType: hashType)
+            let signature: Data = try! key.privkey.signTransaction(txMock, utxoToSign: utxoMock, hashType: hashType)
             let sigWithHashType: Data = signature + UInt8(hashType)
             sigKeyPairs.append(SigKeyPair(sigWithHashType, key.pubkey))
         }

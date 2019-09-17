@@ -596,7 +596,7 @@ class OpCodeTests: XCTestCase {
         let hashType: SighashType = SighashType.BTC.ALL
         let utxoToSign = TransactionOutput(value: balance, lockingScript: subScript)
         let _txHash = unsignedTx.signatureHash(for: utxoToSign, inputIndex: 0, hashType: hashType)
-        guard let signature: Data = try? Crypto.sign(_txHash, privateKey: privateKey) else {
+        guard let signature: Data = try? ECDSA().sign(_txHash, privateKey: privateKey) else {
             XCTFail("Failed to sign tx.")
             return
         }
@@ -682,7 +682,7 @@ class OpCodeTests: XCTestCase {
         let hashType: SighashType = SighashType.BCH.ALL
         let utxoToSign = TransactionOutput(value: balance, lockingScript: subScript)
         let _txHash = unsignedTx.signatureHash(for: utxoToSign, inputIndex: 0, hashType: hashType)
-        guard let signature: Data = try? Crypto.sign(_txHash, privateKey: privateKey) else {
+        guard let signature: Data = try? ECDSA().sign(_txHash, privateKey: privateKey) else {
             XCTFail("Failed to sign tx.")
             return
         }

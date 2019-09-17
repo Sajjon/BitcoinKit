@@ -54,24 +54,39 @@ public struct Crypto {
     public static func hmacsha512(data: Data, key: Data) -> Data {
         return _Hash.hmacsha512(data, key: key)
     }
+}
 
-    public static func sign(_ data: Data, privateKey: PrivateKey) throws -> Data {
-        #if BitcoinKitXcode
-        return _Crypto.signMessage(data, withPrivateKey: privateKey.data)
-        #else
-        return try _Crypto.signMessage(data, withPrivateKey: privateKey.data)
-        #endif
+public protocol SignatureScheme {
+    func sign(_ data: Data, privateKey: PrivateKey) throws -> Data
+    func verifySignature(_ signature: Data, message: Data, publicKey: Data) throws -> Bool
+}
+
+public extension SignatureScheme {
+
+    func signTransaction(
+        _ tx: Transaction,
+        utxoToSign: UnspentTransaction,
+        hashType: SighashType,
+        privateKey: PrivateKey,
+        inputIndex: Int = 0
+    ) throws -> Data {
+
+        let sighash: Data = tx.signatureHash(
+            for: utxoToSign.output,
+            inputIndex: inputIndex,
+            hashType: hashType
+        )
+
+        return try sign(sighash, privateKey: privateKey)
     }
 
-    public static func verifySignature(_ signature: Data, message: Data, publicKey: Data) throws -> Bool {
-        #if BitcoinKitXcode
-        return _Crypto.verifySignature(signature, message: message, publicKey: publicKey)
-        #else
-        return try _Crypto.verifySignature(signature, message: message, publicKey: publicKey)
-        #endif
-    }
-
-    public static func verifySigData(for tx: Transaction, inputIndex: Int, utxo: TransactionOutput, sigData: Data, pubKeyData: Data) throws -> Bool {
+    func verifySigData(
+        for tx: Transaction,
+        inputIndex: Int,
+        utxo: TransactionOutput,
+        sigData: Data,
+        pubKeyData: Data
+    ) throws -> Bool {
         // Hash type is one byte tacked on to the end of the signature. So the signature shouldn't be empty.
         guard !sigData.isEmpty else {
             throw ScriptMachineError.error("SigData is empty.")
@@ -83,8 +98,31 @@ public struct Crypto {
 
         let sighash: Data = tx.signatureHash(for: utxo, inputIndex: inputIndex, hashType: hashType)
 
-        return try Crypto.verifySignature(signature, message: sighash, publicKey: pubKeyData)
+        return try verifySignature(signature, message: sighash, publicKey: pubKeyData)
     }
+}
+
+public struct ECDSA: SignatureScheme {
+    public init() {}
+}
+
+public extension ECDSA {
+    func sign(_ data: Data, privateKey: PrivateKey) throws -> Data {
+        #if BitcoinKitXcode
+        return _Crypto.signMessage(data, withPrivateKey: privateKey.data)
+        #else
+        return try _Crypto.signMessage(data, withPrivateKey: privateKey.data)
+        #endif
+    }
+
+    func verifySignature(_ signature: Data, message: Data, publicKey: Data) throws -> Bool {
+        #if BitcoinKitXcode
+        return _Crypto.verifySignature(signature, message: message, publicKey: publicKey)
+        #else
+        return try _Crypto.verifySignature(signature, message: message, publicKey: publicKey)
+        #endif
+    }
+
 }
 
 public enum CryptoError: Error {

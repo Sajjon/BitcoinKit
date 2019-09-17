@@ -166,7 +166,7 @@ public func signTx(unsignedTx: UnsignedTransaction, keys: [PrivateKey]) -> Trans
         }
         
         let sighash: Data = transactionToSign.signatureHash(for: utxo.output, inputIndex: i, hashType: SighashType.BCH.ALL)
-        let signature: Data = try! Crypto.sign(sighash, privateKey: key)
+        let signature: Data = try! ECDSA().sign(sighash, privateKey: key)
         let txin = inputsToSign[i]
         let pubkey = key.publicKey()
         

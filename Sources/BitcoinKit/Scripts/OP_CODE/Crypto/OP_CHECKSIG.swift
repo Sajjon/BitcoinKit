@@ -40,7 +40,7 @@ public struct OpCheckSig: OpCodeProtocol {
         guard let tx = context.transaction, let utxo = context.utxoToVerify else {
             throw OpCodeExecutionError.error("The transaction or the utxo to verify is not set.")
         }
-        let valid = try Crypto.verifySigData(for: tx, inputIndex: Int(context.inputIndex), utxo: utxo, sigData: sigData, pubKeyData: pubkeyData)
+        let valid = try ECDSA().verifySigData(for: tx, inputIndex: Int(context.inputIndex), utxo: utxo, sigData: sigData, pubKeyData: pubkeyData)
         context.pushToStack(valid)
     }
 }

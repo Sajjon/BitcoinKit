@@ -63,7 +63,7 @@ class TransactionTests: XCTestCase {
         let hashType: SighashType = SighashType.BTC.ALL
         let _txHash = Crypto.sha256sha256(_tx.serialized() + UInt32(hashType).littleEndian)
         XCTAssertEqual(_txHash.hex, "fd2f20da1c28b008abcce8a8ac7e1a7687fc944e001a24fc3aacb6a7570a3d0f")
-        guard let signature: Data = try? Crypto.sign(_txHash, privateKey: privateKey) else {
+        guard let signature: Data = try? ECDSA().sign(_txHash, privateKey: privateKey) else {
             XCTFail("failed to sign")
             return
         }

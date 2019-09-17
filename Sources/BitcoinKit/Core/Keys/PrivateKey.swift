@@ -148,9 +148,20 @@ public struct PrivateKey {
         return Base58.encode(payload + checksum)
     }
 
-    public func sign(_ tx: Transaction, utxoToSign: UnspentTransaction, hashType: SighashType, inputIndex: Int = 0) -> Data {
-        let sighash: Data = tx.signatureHash(for: utxoToSign.output, inputIndex: inputIndex, hashType: hashType)
-        return try! Crypto.sign(sighash, privateKey: self)
+    public func signTransaction(
+        _ tx: Transaction,
+        utxoToSign: UnspentTransaction,
+        hashType: SighashType,
+        inputIndex: Int = 0,
+        schema signer: SignatureScheme = ECDSA()
+    ) throws -> Data {
+
+        return try signer.signTransaction(
+            tx,
+            utxoToSign: utxoToSign,
+            hashType: hashType,
+            privateKey: self, inputIndex: inputIndex
+        )
     }
 }
 
